@@ -1,0 +1,2 @@
+*.sh eol=lf
+insecure_private_key eol=lf
