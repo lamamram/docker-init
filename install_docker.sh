@@ -6,43 +6,27 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-which docker
-ret=$?
-if [ $ret -eq 0 ]; then
-  exit 0
-fi
+# Add Docker's official GPG key:
+apt-get update
+apt-get install -y ca-certificates curl git jq yq tree
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+chmod a+r /etc/apt/keyrings/docker.asc
 
-# génération du cachec apt
-apt-get update -q
-
-# install des prérequis (-y confirme, -q diminue l'affichage en console)
-apt-get install -yq \
-    ca-certificates \
-    curl \
-    gnupg \
-    lsb-release
-
-# téléchargement et install de la clé d'authentification des paquets
-mkdir -p /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-
-# ajout du dépôt docker qui contient les paquets docker à apt
+# Add the repository to Apt sources:
 echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
-
-# regénénrer le cache apt pour tenir compte du nouveau dépôt
-apt-get update -q
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  tee /etc/apt/sources.list.d/docker.list > /dev/null
+apt-get update
 
 # install des paquets docker
-apt-get install -yq \
-    docker-ce \
-    docker-ce-cli \
-    containerd.io \
-    docker-compose-plugin
+apt-get install -y docker-ce \
+        docker-ce-cli \
+        containerd.io \
+        docker-buildx-plugin \
+        docker-compose-plugin
 
 # ajout de l'utilisateur vagrant au groupe docker 
 # autorisé à exécuter des commandes docker sans sudo
 usermod -aG docker vagrant
-
-
