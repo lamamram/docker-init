@@ -50,17 +50,16 @@ mariadb:11.5
 docker run \
 --name stack-php-php8.2 \
 -d --restart unless-stopped \
---env-file .env \
 --net stack_php \
 -v nfs-vol:/srv \
--v ./www.conf:/opt/bitnami/php/etc/php-fpm.d/www.conf:ro \
 bitnami/php-fpm:8.2-debian-12
 
 # --mount src=,dst=/srv,volume-driver=local,volume-opt=type=nfs,volume-opt=o=addr=192.168.1.30,volume-opt=device=:/mnt/nfs-dir \
 #-v ./index.php:/srv/index.php:ro \
 # docker cp index.php stack-php-php8.2:/srv/index.php
 # --env-file .env \
-# -v ./php-fpm.conf:/php-fpm.conf:ro \
+# -v ./www.conf:/opt/bitnami/php/etc/php-fpm.d/www.conf:ro \
+# -v ./environment.conf:/opt/bitnami/php/etc/environment.conf \
 
 docker run \
 --name stack-php-web \
