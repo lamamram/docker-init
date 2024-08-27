@@ -6,6 +6,7 @@
 
 ## ajouter un dossier /opt/tomcat
 ## injecter le fichier https://downloads.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz dans ce dossier
+
 ## décomprésser dans ce dossier sans dossier intermédiaire 
 ## et supprimer l'archive
 
