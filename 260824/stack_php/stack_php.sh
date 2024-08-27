@@ -10,6 +10,11 @@ if [ $? -eq 0 ]; then
     docker network rm stack_php
 fi
 
+# docker volume ls | grep nfs-vol
+# if [ $? -eq 0 ]; then
+#     docker volume rm nfs-vol
+# fi
+
 ############################ RESEAU ######################################
 
 docker network create \
@@ -25,6 +30,7 @@ docker run \
 --net stack_php \
 --env-file .env \
 -v ./mariadb-init.sql:/docker-entrypoint-initdb.d/mariadb-init.sql:ro \
+-v db_data:/var/lib/mysql \
 mariadb:11.5
 
 # --env MARIADB_USER=test \
