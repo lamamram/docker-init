@@ -1,0 +1,32 @@
+---
+
+networks:
+  # arbitraire
+  stack-php:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/24
+          gateway: 172.18.0.1
+
+volumes:
+  db_data:
+  nfs-vol:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.30,ro
+      device: :/mnt/nfs-dir
+
+services:
+  stack-php-web:
+    image: nginx:1.27.1-alpine-slim
+    restart: unless-stopped
+    ports:
+      - 8080:80
+    networks:
+      - stack_php
+    volumes:
+      - ./vhost.conf:/etc/nginx/conf.d/vhost.conf:ro
+    
+
