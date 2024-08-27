@@ -1,8 +1,10 @@
 ---
 
 networks:
-  # arbitraire
-  stack-php:
+  # arbitraire (par défaut ce nom est préfixé par le dossier parent)
+  stack_php:
+    # fixer le nom
+    name: stack_php
     driver: bridge
     ipam:
       config:
@@ -10,8 +12,11 @@ networks:
           gateway: 172.18.0.1
 
 volumes:
+  # arbitraire (par défaut ce nom est préfixé par le dossier parent)
   db_data:
+    name: db_data
   nfs-vol:
+    name: nfs-vol
     driver: local
     driver_opts:
       type: nfs
@@ -19,7 +24,9 @@ volumes:
       device: :/mnt/nfs-dir
 
 services:
+  # arbitraire (par défaut ce nom est préfixé par le dossier parent)
   stack-php-web:
+    container_name: stack-php-web
     image: nginx:1.27.1-alpine-slim
     restart: unless-stopped
     ports:
@@ -30,6 +37,7 @@ services:
       - ./vhost.conf:/etc/nginx/conf.d/vhost.conf:ro
 
   stack-php-php8.2:
+    container_name: stack-php-php8.2
     image: bitnami/php-fpm:8.2-debian-12
     restart: unless-stopped
     networks:
@@ -38,6 +46,7 @@ services:
       - nfs-vol:/srv
   
   stack-php-db:
+    container_name: stack-php-db
     image: mariadb:11.5
     restart: unless-stopped
     networks:
