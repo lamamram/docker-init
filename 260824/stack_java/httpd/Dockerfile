@@ -19,4 +19,14 @@ EXPOSE 443
 WORKDIR /usr/local/apache2
 
 ### EXECUTION DU CONTENEUR DEPUIS L'IMAGE
-ENTRYPOINT [ "httpd", "-D",  "FOREGROUND"]
+## 1ère façon
+# REM: ENTRYPOINT donne une commande non substituable avec le docker run
+# ENTRYPOINT [ "httpd", "-D",  "FOREGROUND"]
+
+## 2ème façon
+# ENTRYPOINT [ "httpd"]
+# # REM: CMD donne une commande substituable avec le docker run
+# CMD ["-D",  "FOREGROUND"]
+
+## 3ème façon
+CMD [ "httpd", "-D",  "FOREGROUND"]
