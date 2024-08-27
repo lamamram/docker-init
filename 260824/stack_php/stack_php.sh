@@ -24,6 +24,7 @@ docker run \
 -d --restart unless-stopped \
 --net stack_php \
 --env-file .env \
+-v ./mariadb-init.sql:/docker-entrypoint-initdb.d/mariadb-init.sql:ro \
 mariadb:11.5
 
 # --env MARIADB_USER=test \
@@ -40,7 +41,8 @@ docker run \
 bitnami/php-fpm:8.2-debian-12
 
 # docker cp index.php stack-php-php8.2:/srv/index.php
-
+# --env-file .env \
+# -v ./php-fpm.conf:/php-fpm.conf:ro \
 
 docker run \
 --name stack-php-web \
