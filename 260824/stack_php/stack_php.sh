@@ -36,8 +36,10 @@ mariadb:11.5
 docker run \
 --name stack-php-php8.2 \
 -d --restart unless-stopped \
+--env-file .env \
 --net stack_php \
 -v ./index.php:/srv/index.php:ro \
+-v ./www.conf:/opt/bitnami/php/etc/php-fpm.d/www.conf:ro \
 bitnami/php-fpm:8.2-debian-12
 
 # docker cp index.php stack-php-php8.2:/srv/index.php

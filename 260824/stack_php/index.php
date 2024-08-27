@@ -17,5 +17,6 @@ try{
 catch(\Exception $e){
     print_r($e);
 }
+echo $_ENV['TOTO'];
 echo '</pre>';
 ?>
