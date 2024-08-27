@@ -5,22 +5,20 @@
 
 
 ## ajouter un dossier /opt/tomcat
-
-
-## injecter le fichier https://downloads.apache.org/tomcat/tomcat-9/v9.0.88/bin/apache-tomcat-9.0.88.tar.gz dans ce dossier
-
+## injecter le fichier https://downloads.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz dans ce dossier
 ## décomprésser dans ce dossier sans dossier intermédiaire 
+## et supprimer l'archive
+
 
 ## installer java (yum)
+## et nettoyer le dépôt yum après
 
 ## ajouter un utilisateur tomcat avec le dossier /opt/tomcat comme home
-
 ## changer le home de l'image vers /opt/tomcat/webapps
 
 ## télécharger l'application sample https://tomcat.apache.org/tomcat-10.1-doc/appdev/sample/sample.war dans le dossier home 
 
 ## spécifier le propriétaire et groupe à tomcat 
-
 ## changer l'utilisateur à tomcat
 
 ## persister le dossier home pour accéder ou sauvegarder les apps
