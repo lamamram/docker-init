@@ -10,10 +10,10 @@ if [ $? -eq 0 ]; then
     docker network rm stack_php
 fi
 
-# docker volume ls | grep nfs-vol
-# if [ $? -eq 0 ]; then
-#     docker volume rm nfs-vol
-# fi
+docker volume ls | grep nfs-vol
+if [ $? -eq 0 ]; then
+    docker volume rm nfs-vol
+fi
 
 ############################ RESEAU ######################################
 
@@ -22,6 +22,14 @@ docker network create \
        --gateway=172.18.0.1 \
        stack_php
 
+############################ VOLUMES #####################################
+
+docker volume create \
+       --driver local \
+       --opt type=nfs \
+       --opt o=addr=192.168.1.30,ro \
+       --opt device=:/mnt/nfs-dir \
+       nfs-vol
 
 ############################ CONTAINERS ###################################
 docker run \
@@ -44,10 +52,12 @@ docker run \
 -d --restart unless-stopped \
 --env-file .env \
 --net stack_php \
--v ./index.php:/srv/index.php:ro \
+-v nfs-vol:/srv \
 -v ./www.conf:/opt/bitnami/php/etc/php-fpm.d/www.conf:ro \
 bitnami/php-fpm:8.2-debian-12
 
+# --mount src=,dst=/srv,volume-driver=local,volume-opt=type=nfs,volume-opt=o=addr=192.168.1.30,volume-opt=device=:/mnt/nfs-dir \
+#-v ./index.php:/srv/index.php:ro \
 # docker cp index.php stack-php-php8.2:/srv/index.php
 # --env-file .env \
 # -v ./php-fpm.conf:/php-fpm.conf:ro \

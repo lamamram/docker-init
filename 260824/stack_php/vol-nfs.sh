@@ -10,7 +10,7 @@
 # sudo chmod 755 /mnt/nfs-dir
 # sudo chmod 644 /mnt/nfs-dir/*
 # # configuration server nfs
-# echo "/mnt/nfs-dir 192.168.1.0/24(rw,sync,no_subtree_check,no_all_squash)" | sudo tee -a /etc/exports
+# echo "/mnt/nfs-dir *(rw,sync,no_subtree_check,no_all_squash)" | sudo tee -a /etc/exports
 # sudo exportfs -a
 # sudo systemctl restart nfs-kernel-server
 
