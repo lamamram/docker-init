@@ -1,12 +1,17 @@
 ## nous allons utiliser une image centos 9: quay.io/centos/centos:stream9
-
+FROM quay.io/centos/centos:stream9
 
 ## documenter l'image
-
+LABEL author="mlamamra"
+LABEL created_at="2024-08-28"
+LABEL created_at.year="2024"
+LABEL stack="java"
+LABEL stack.item="tomcat"
 
 ## ajouter un dossier /opt/tomcat
+RUN mkdir /opt/tomcat
 ## injecter le fichier https://downloads.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz dans ce dossier
-
+ADD https://downloads.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz /opt/tomcat
 ## décomprésser dans ce dossier sans dossier intermédiaire 
 ## et supprimer l'archive
 
