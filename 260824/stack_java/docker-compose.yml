@@ -4,17 +4,29 @@ services:
   stack-java-httpd:
     container_name: stack-java-httpd
     image: stack-java-httpd:1.0
+    ## politique de build dans docker compose
+    # 1. si l'image en local pas de build
+    # 2. sinon build
+    # 3. sans le cache no_cache (ou docker buildx prune)
+    # REM: pas de build avec docker compose sur SWARM cluster
+    build:
+      context: ./httpd
+      dockerfile: Dockerfile
+      # no_cache: true
     restart: unless-stopped
     ports:
       - 8081:80
     networks:
       - stack_java
     depends_on:
-      - stack-php-tomcat
+      - stack-java-tomcat
 
-  stack-php-tomcat:
+  stack-java-tomcat:
     container_name: stack-java-tomcat
     image: stack-java-tomcat:1.0
+    build:
+      context: ./tomcat
+      dockerfile: Dockerfile
     restart: unless-stopped
     networks:
       - stack_java
