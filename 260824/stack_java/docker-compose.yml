@@ -1,0 +1,31 @@
+---
+
+services:
+  stack-java-httpd:
+    container_name: stack-java-httpd
+    image: stack-java-httpd:1.0
+    restart: unless-stopped
+    ports:
+      - 8081:80
+    networks:
+      - stack_java
+    depends_on:
+      - stack-php-tomcat
+
+  stack-php-tomcat:
+    container_name: stack-java-tomcat
+    image: stack-java-tomcat:1.0
+    restart: unless-stopped
+    networks:
+      - stack_java
+
+networks:
+  # arbitraire (par défaut ce nom est préfixé par le dossier parent)
+  stack_java:
+    # fixer le nom
+    name: stack_java
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.19.0.0/24
+          gateway: 172.19.0.1
