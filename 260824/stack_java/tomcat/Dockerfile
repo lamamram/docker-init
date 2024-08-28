@@ -21,7 +21,7 @@ LABEL stack.item="tomcat"
 RUN mkdir /opt/tomcat && \
     curl https://downloads.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz | \
     tar -xvz -C /opt/tomcat --strip-components=1 && \
-    yum update -q && yum install -q -y java && \
+    yum update -q && yum install -q -y java-1.8.0-openjdk-headless && \
     yum clean all && rm -rf /var/cache/yum
 
 ## ajouter un utilisateur tomcat sans le dossier /opt/tomcat comme home avec groupe propriétaire
