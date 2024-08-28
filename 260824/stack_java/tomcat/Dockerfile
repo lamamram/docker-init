@@ -9,18 +9,20 @@ LABEL stack="java"
 LABEL stack.item="tomcat"
 
 ## ajouter un dossier /opt/tomcat
-RUN mkdir /opt/tomcat
 ## injecter le fichier https://downloads.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz dans ce dossier
-ADD https://downloads.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz /opt/tomcat
 ## décomprésser dans ce dossier sans dossier intermédiaire 
-RUN tar -xvzf /opt/tomcat/apache-tomcat-9.0.93.tar.gz -C /opt/tomcat --strip-components=1
 ## et supprimer l'archive
-RUN rm -f /opt/tomcat/apache-tomcat-9.0.93.tar.gz
-
 ## installer java (yum)
-RUN yum update -q && yum install -q -y java
 ## et nettoyer le dépôt yum après
-RUN yum clean all && rm -rf /var/cache/yum
+## OPTIMISATION 
+# 1. minimiser les couches de RUN avec &&
+# 2. créer des couches uniques enchaînant les créations / modifications / suppressions à cause du Copy On Write
+# 3. Essayer de travailler en flux et non en fichier 
+RUN mkdir /opt/tomcat && \
+    curl https://downloads.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz | \
+    tar -xvz -C /opt/tomcat --strip-components=1 && \
+    yum update -q && yum install -q -y java && \
+    yum clean all && rm -rf /var/cache/yum
 
 ## ajouter un utilisateur tomcat sans le dossier /opt/tomcat comme home avec groupe propriétaire
 RUN useradd -M -U tomcat
