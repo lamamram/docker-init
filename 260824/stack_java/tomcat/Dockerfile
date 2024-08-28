@@ -18,6 +18,9 @@ LABEL stack.item="tomcat"
 # 1. minimiser les couches de RUN avec &&
 # 2. créer des couches uniques enchaînant les créations / modifications / suppressions à cause du Copy On Write
 # 3. Essayer de travailler en flux et non en fichier 
+## pour aller plus loin
+# 1. installer un jre nu via les sources (n'existe sur yum)
+# 2. Si possible utiliser un FROM alpine
 RUN mkdir /opt/tomcat && \
     curl https://downloads.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz | \
     tar -xvz -C /opt/tomcat --strip-components=1 && \
