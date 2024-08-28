@@ -20,6 +20,13 @@ services:
       - stack_java
     depends_on:
       - stack-java-tomcat
+    labels:
+      - truc.machin=bidule
+    # on désactive la capacité "chown" du root du conteneur 
+    cap_drop:
+      - CAP_CHOWN
+    # CGROUPS limite max phys. de ram allouable dans le conteneur
+    mem_limit: 300m
 
   stack-java-tomcat:
     container_name: stack-java-tomcat
