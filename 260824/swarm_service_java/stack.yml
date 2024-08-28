@@ -8,9 +8,9 @@ services:
       stack_java:
         aliases:
           - stack-java-tomcat
-      # traefik-public:
-      #   aliases:
-      #     - stack-java-tomcat
+      traefik-public:
+        aliases:
+          - stack-java-tomcat
     restart: unless-stopped
     labels:
       - author.username=mlamamra
@@ -54,7 +54,9 @@ services:
         # on peut spécifier des aliases pour différencier le nom du service
         aliases:
           - stack-java-httpd
-      # traefik-public:
+      traefik-public:
+        aliases:
+          - stack-java-httpd
     depends_on:
       - tomcat
     labels:

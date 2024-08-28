@@ -27,7 +27,8 @@ services:
         - traefik.docker.lbswarm=true
     volumes:
       # traefik a besoin de découvrir les conteneurs (en utilisant dockerd)
-      - /var/run/docker.sock:/var/run/docker.sock:ro    
+      - /var/run/docker.sock:/var/run/docker.sock:ro  
+      - ./log:/var/log  
     command:
       # activation du mode swarm pour traefik
       - --providers.swarm.endpoint=unix:///var/run/docker.sock
@@ -43,6 +44,12 @@ services:
       - --api.dashboard=true 
       # idem en http
       - --api.insecure=true
+      - "--api"
+      - "--api.debug=true"
+      - "--log=true"
+      - "--log.level=DEBUG"
+      - "--log.filepath=/var/log/traefik.log"
+      - "--accesslog.filepath=/var/log/access.log"
     networks:
       - traefik-public
 
