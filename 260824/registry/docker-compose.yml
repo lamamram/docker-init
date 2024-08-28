@@ -5,19 +5,22 @@ services:
     image: registry:2
     container_name: registry
     restart: unless-stopped
+    # valeurs des variables d'environnement surchargent les bind-mounts
     environment:
       REGISTRY_HTTP_TLS_CERTIFICATE: /certs/registry.crt
       REGISTRY_HTTP_TLS_KEY: /certs/registry.key
+      # clients de partout en 443
       REGISTRY_HTTP_ADDR: 0.0.0.0:443
       REGISTRY_AUTH: htpasswd
       REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
       REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
-    # 5000 par défaut
+    # 5000 par défaut ici informatif car REGISTRY_HTTP_ADDR: 0.0.0.0:443
     ports:
       - 5000:5000
       - 443:443
     networks:
       - registry
+    # bind-mount: première configuration
     volumes:
       - ./certs:/certs:ro
       - ./auth:/auth:ro
