@@ -34,6 +34,9 @@ services:
     build:
       context: ./tomcat
       dockerfile: Dockerfile
+      args:
+        - TOMCAT_VERSION_MAJOR=${TOMCAT_VERSION_MAJOR:-9}
+        - TOMCAT_VERSION_FULL=${TOMCAT_VERSION_FULL:-9.0.93}
     restart: unless-stopped
     networks:
       - stack_java
