@@ -21,7 +21,7 @@
 
 ## utilisation du TLS
 
-* warining pour auto signé 
+* warning pour un certif auto signé 
 1. modifier ou créer le fichier `/etc/docker/daemon.json`
 
 ```

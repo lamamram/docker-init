@@ -1,0 +1,145 @@
+image: docker:26.1.3
+
+before_script:
+  - >
+    echo "$CI_JOB_TOKEN" |
+    docker login $CI_REGISTRY
+    -u "$CI_REGISTRY_USER"
+    --password-stdin
+
+variables:
+  MANUAL_TRIGGER: "off"
+
+stages:
+  - download
+  - build
+  - scan
+  - prepare
+
+trigger_dev:
+  stage: .pre
+  trigger:
+    project: myusine/dev
+    branch: main
+    strategy: depend
+  rules:
+    - if: $MANUAL_TRIGGER == "on"
+
+download:
+  stage: download
+  image: curlimages/curl:latest
+  before_script: []
+  tags:
+    - myusine
+  script:
+    - >
+      curl 
+      -k 
+      --fail-with-body 
+      -o ./app-java/tomcat/sample.war 
+      --header "JOB-TOKEN: $CI_JOB_TOKEN" 
+      ${CI_API_V4_URL}/projects/1/packages/generic/dev/sample.war
+  artifacts:
+    expire_in: "1 hour"
+    paths:
+      - ./app-java/tomcat/sample.war
+
+# .build_httpd:
+#   stage: build
+    # ...
+    # script:
+    #   - cd app-java/httpd
+    #   - ...
+
+
+build_tomcat:
+  stage: build
+  tags:
+    - myusine
+  script:
+    - cd app-java/tomcat
+    - >
+      docker build 
+      -t "$CI_REGISTRY_IMAGE/app-java-tomcat:1.0"
+      --build-arg TOMCAT_VERSION_MAJOR=9
+      --build-arg TOMCAT_VERSION_FULL=9.0.89
+      --build-arg CI_API_V4_URL=$CI_API_V4_URL
+      --build-arg CI_PROJECT_ID=$CI_PROJECT_ID
+      --build-arg CI_JOB_TOKEN=$CI_JOB_TOKEN
+      .
+    - docker run --name test_build -d "$CI_REGISTRY_IMAGE/app-java-tomcat:1.0"
+    - sleep 5
+    - docker ps -f "name=test_build" | grep -o "(healthy)"
+    - docker push "$CI_REGISTRY_IMAGE/app-java-tomcat:1.0"
+  after_script:
+    - docker rm -f test_build
+
+
+scan:
+  stage: scan
+  variables:
+    # GIT STRATEGY: je ne pas besoin du dépôt git
+    GIT_STRATEGY: none
+    TRIVY_USERNAME: "$CI_REGISTRY_USER"
+    TRIVY_PASSWORD: "$CI_JOB_TOKEN"
+    TRIVY_AUTH_URL: "$CI_REGISTRY"
+    TRIVY_INSECURE: "true"
+    TRIVY_OPTS: >
+                --severity LOW
+                --scanners vuln
+                --cache-dir .trivycache/
+    # --format template            
+    # --no-progress
+  image:
+    name: aquasec/trivy
+    entrypoint: [""]
+  tags: [myusine]
+  # neutralise le before_script global
+  before_script: [""]
+  script:
+    - >
+      trivy image 
+      $TRIVY_OPTS
+      "$CI_REGISTRY_IMAGE/app-java-tomcat:1.0"
+    # --template "@/contrib/gitlab.tpl" 
+    # --output "$CI_PROJECT_DIR/gl-container-scanning-report.json"
+    # - >
+    #   trivy image 
+    #   $TRIVY_OPTS
+    #   --template "@/contrib/html.tpl" 
+    #   --output "$CI_PROJECT_DIR/html-container-scanning-report.html"
+    #   "$CI_REGISTRY_IMAGE/app-java-tomcat:1.0"
+  cache:
+    key: trivy
+    paths:
+      - .trivycache/
+    policy: pull-push
+  # artifacts:
+  #   expire_in: "1 hour"
+  #   paths:
+  #     - gl-container-scanning-report.json
+    # pour intégration dans gitlab pour version < 15 (pas gratuit)
+    # reports:
+    #   container_scanning: gl-container-scanning-report.json
+
+prepare:
+  stage: prepare
+  tags:
+    - myusine
+  image: alpinelinux/ansible:latest
+  before_script:
+    - mkdir ~/.ssh
+    - echo "$ANSIBLE_PKEY" > ~/.ssh/id_rsa
+    - chmod 700 ~/.ssh && chmod 600 ~/.ssh/id_rsa
+    - mv ansible/ansible.cfg ~/.ansible.cfg
+    - mv ansible/inventory ~/inventory
+  script:
+    - cd ansible
+    - mkdir roles && mv ../install-docker roles/install-docker  
+    - >
+      ansible-playbook 
+      -e "ansible_become_pass=$ANSIBLE_USER_PASS"
+      playbook_main.yml
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
