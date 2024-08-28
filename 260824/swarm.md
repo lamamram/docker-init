@@ -1,11 +1,13 @@
 ## création du cluster
 
+0. chaque noeud doit avoir installé docker
+
 1. création d'un noeud de type **manager**
   * sur formation.lan: `docker swarm init --advertise-addr [ip de formation.lan]`
   * voir les noeuds du cluster: `docker node ls`
 
 2. ajout d'un noeud de type **worker** au cluster
-  * se rendre sur la machine: `sudo docker-machine ssh workeri`
+  * se rendre sur les machines workeri
   * exécuter
   ```
    docker swarm join --token SWMTKN-1-[SEPCIFIC_TOKEN] [manager_ip]:2377
@@ -16,10 +18,11 @@
 
 4. il est possible d'utiliser plusieurs noeuds de type manager
    => pour augmenter les ressources swarm qui pilotent **le cycle de vie des services**
-   * dans le manager : `docker node promote worker[i]`
+   * dans le manager : `docker node promote worker[i]` ou l'inverse avec `demote`
    * REM: un "mini-cluster" Manager élit régulièrement un Leader Prime pour initier les servies du Manager
    => étant qu'on a un élection il nous faut un nb **impair** de leaders pour faciliter le
    résulat
+   * métriques maximale d'un cluster SWARM: <= 100 noeuds et 500 <= 1000 services
 ## lancement d'un service sur le cluster
 
 * un service est l'abstraction de l'accès à un conteneur sans savoir sur quelle machine il se trouve
@@ -38,7 +41,7 @@ docker service create \
 * liste des services du cluster: `docker service ls`
 * inspection d'un service: `docker service inspect --pretty [service_name]`
 * détail des conteneurs d'un service (task): `docker service ps [service_name]`
-* utiliser également `docker run -it -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock dockersamples/visualizer` pour visualiser graphiqument
+* utiliser également `docker run -it -d -p 8082:8080 -v /var/run/docker.sock:/var/run/docker.sock dockersamples/visualizer` pour visualiser graphiqument
 * les logs du service: `docker service logs [service_name]`
 * suppression du service: `docker service rm [service_name]`
 > attention: on ne stoppe ni démarre un sevrvice !!!
@@ -62,8 +65,8 @@ par ex.
   - commande des tâches: `--args "new command"`
   - config réseaux des conteneurs `--network-add, --network-rm ...`
   - volumes
-  - ressources dispo ...
-  - repliques : `docker service scale <service_name>=<replica_nb>`
+  - ressources dispo ... (cgroups => mise en échelle verticale)
+  - repliques : `docker service scale <service_name>=<replica_nb>` => mise en échelle horizontale
 
 * montée en versions
   - préalable: établir un timeout entre 2 mises à jours de conteneurs pour un même service
@@ -76,6 +79,7 @@ par ex.
   alpine:3.16 \
   ping 8.8.8.8
   ```
+  * EX: ![](https://www.bluematador.com/hs-fs/hubfs/blog/new/Kubernetes%20Deployments%20-%20Rolling%20Update%20Configuration/Kubernetes-Deployments-Rolling-Update-Configuration.gif?width=2400&name=Kubernetes-Deployments-Rolling-Update-Configuration.gif)
 
   - mise à jour de l'image : `docker service update --image [new_image] [service]`
   - le service garde l'historique des conteneur de la version précédente en cas de rollback
@@ -91,7 +95,8 @@ par ex.
   `docker service update --update-delay --update-parallelism [service_name]`
 
 ### rollback
-  - silplifié puisque on ne peut pas reset vers un état hors l'état précédent
+  - `docker service rollback`
+  - simplifié puisque on ne peut pas reset vers un état hors l'état précédent
   - le rollback ne va pas impacter le options liés au mode d'update (paralélisme etc.)
 
 ## configuration réseau mesh

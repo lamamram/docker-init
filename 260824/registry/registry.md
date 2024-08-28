@@ -32,7 +32,7 @@
 # sudo systemctl restart docker
 ```
 
-ajouter le certicat côté client (autorité de certification locale)
+ajouter le certificat côté client (autorité de certification locale)
 ```
 cd /vagrant/registry
 sudo mkdir -p /etc/docker/certs.d/formation.lan:443
