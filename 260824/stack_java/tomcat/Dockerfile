@@ -30,10 +30,9 @@ RUN useradd -M -U tomcat
 WORKDIR /opt/tomcat/webapps
 ## télécharger l'application sample https://tomcat.apache.org/tomcat-10.1-doc/appdev/sample/sample.war dans le dossier home 
 ## REM : curl est plus rapide que ADD sur des fichiers volumineux
-RUN curl https://tomcat.apache.org/tomcat-10.1-doc/appdev/sample/sample.war -o ./sample.war
-
 ## spécifier le propriétaire et groupe à tomcat (CHOWN) /opt/tomcat
-RUN chown -R tomcat:tomcat /opt/tomcat
+RUN curl https://tomcat.apache.org/tomcat-10.1-doc/appdev/sample/sample.war -o ./sample.war && \
+    chown -R tomcat:tomcat /opt/tomcat
 ## changer l'utilisateur à tomcat
 USER tomcat
 
