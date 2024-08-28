@@ -37,6 +37,12 @@ services:
     restart: unless-stopped
     networks:
       - stack_java
+    # healthcheck:
+    #   test: ["executable", "arg"]
+    #   interval: 1m30s
+    #   timeout: 30s
+    #   retries: 5
+    #   start_period: 30s
 
 networks:
   # arbitraire (par défaut ce nom est préfixé par le dossier parent)

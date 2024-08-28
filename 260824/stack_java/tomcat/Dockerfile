@@ -55,3 +55,16 @@ EXPOSE 8080
 # ENTRYPOINT [ "executable" ]
 ## ajouter la sous commande pour lancer en one shot run ou start ???
 CMD [ "/opt/tomcat/bin/catalina.sh", "run" ]
+
+# warning: le CMD de HEALTHCHECK est allérgique du lancement de type tokens ["", ""]
+# après le lancement du CMD précédent (docker run),
+# on attent 3s (start-period)
+# pour lancer CMD du HEALTHCHECK avec un timeout de 5s,
+# si le CMD est vrai (exit-code 0) => le docker ps donne un STATUS (healthy),
+# sinon on peut réessayer 3x (retries), avec une durée d'attente de 3s(interval)
+HEALTHCHECK \
+           --start-period=3s \
+           --timeout=5s \
+           --retries=3 \
+           --interval=3s \
+           CMD grep "Server startup" /opt/tomcat/logs/catalina.*.log
