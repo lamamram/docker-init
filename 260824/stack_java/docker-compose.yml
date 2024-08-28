@@ -3,7 +3,7 @@
 services:
   stack-java-httpd:
     container_name: stack-java-httpd
-    image: stack-java-httpd:1.0
+    image: 192.168.1.30:443/stack-java-httpd:1.0
     ## politique de build dans docker compose
     # 1. si l'image en local pas de build
     # 2. sinon build
@@ -13,6 +13,8 @@ services:
       context: ./httpd
       dockerfile: Dockerfile
       # no_cache: true
+    # par défaut: essayer de pull du registre
+    pull_policy: missing
     restart: unless-stopped
     ports:
       - 8081:80
