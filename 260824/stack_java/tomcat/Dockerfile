@@ -8,6 +8,13 @@ LABEL created_at.year="2024"
 LABEL stack="java"
 LABEL stack.item="tomcat"
 
+# création && / || modification variables => pour le run
+ENV MY_USER=tomcat
+
+# injection de paramètres depuis le build
+ARG TOMCAT_VERSION_MAJOR=9
+ARG TOMCAT_VERSION_FULL
+
 ## ajouter un dossier /opt/tomcat
 ## injecter le fichier https://downloads.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz dans ce dossier
 ## décomprésser dans ce dossier sans dossier intermédiaire 
@@ -22,13 +29,13 @@ LABEL stack.item="tomcat"
 # 1. installer un jre nu via les sources (n'existe sur yum)
 # 2. Si possible utiliser un FROM alpine
 RUN mkdir /opt/tomcat && \
-    curl https://downloads.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz | \
+    curl https://downloads.apache.org/tomcat/tomcat-${TOMCAT_VERSION_MAJOR}/v${TOMCAT_VERSION_FULL}/bin/apache-tomcat-${TOMCAT_VERSION_FULL}.tar.gz | \
     tar -xvz -C /opt/tomcat --strip-components=1 && \
     yum update -q && yum install -q -y java-1.8.0-openjdk-headless && \
     yum clean all && rm -rf /var/cache/yum
 
 ## ajouter un utilisateur tomcat sans le dossier /opt/tomcat comme home avec groupe propriétaire
-RUN useradd -M -U tomcat
+RUN useradd -M -U ${MY_USER}
 ## changer le dossier de travail de l'image vers /opt/tomcat/webapps
 WORKDIR /opt/tomcat/webapps
 ## télécharger l'application sample https://tomcat.apache.org/tomcat-10.1-doc/appdev/sample/sample.war dans le dossier home 
@@ -37,7 +44,7 @@ WORKDIR /opt/tomcat/webapps
 RUN curl https://tomcat.apache.org/tomcat-10.1-doc/appdev/sample/sample.war -o ./sample.war && \
     chown -R tomcat:tomcat /opt/tomcat
 ## changer l'utilisateur à tomcat
-USER tomcat
+USER ${MY_USER}
 
 ## persister le dossier de travail pour accéder ou sauvegarder les apps
 # créé un volume persistent non nommé dans /var/lib/docker/volume dès le run (usage --volumes-from)
