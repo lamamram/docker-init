@@ -23,7 +23,8 @@
 
 ## utilisation du TLS
 
-* warning pour un certif auto signé 
+* warning pour un certif auto signé == certificat de développement crée par nous même
+  => il n'y a pas de certificat `ca.crt` autorité de certification 
 1. modifier ou créer le fichier `/etc/docker/daemon.json`
 
 ```

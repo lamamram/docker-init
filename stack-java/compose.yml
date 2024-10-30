@@ -10,7 +10,13 @@ networks:
 
 services:
   httpd:
-    image: stack-java-httpd:0.1
+    # 1. si l'image existe en local, elle est utilisée 
+    # 2. sinon, si l'image est disponible dans le registre, elle est téléchargée
+    # 2.5 le pull des couches de l'image ne sera effectif si les couches ne sont pas déjà dans le cache
+    # 3. sinon, si la structure build: existe dans le compose.yml, elle est buildée 
+    
+    image: formation.lan:443/stack-java-httpd:0.1
+    # image: stack-java-httpd:0.1
     build:
       context: ./httpd/
       # no_cache: true
@@ -46,7 +52,7 @@ services:
           path: ./httpd/java_app.conf
     
   tomcat:
-    image: stack-java-tomcat:0.1
+    image: formation.lan:443/stack-java-tomcat:0.1
     ## build dans docker compose
     # 1. si l'image en local => pas de build
     # 2. sinon build auto des images manquantes
