@@ -186,7 +186,7 @@ par ex.
    => donc dockerd se dégrade sur http
 
 4. on peut demander l'image poussée formation.lan:443/<image>:<tag> dans la stack.yml
-   => `--with-registry-auth` bypass le pull
-   => attention: tous les noeuds doivent connaître formation.lan => /etc/hosts
-   => attention: tous les noeuds doivent configurer le serveur docker avec le certificat tls auto signé => /etc/docker/daemon.json (cf registry.md) 
+   * => `--with-registry-auth` bypass le pull
+   * => attention: tous les noeuds doivent connaître formation.lan => /etc/hosts
+   * => attention: tous les noeuds doivent configurer le serveur docker avec le certificat tls auto signé => /etc/docker/daemon.json (cf registry.md) 
 5. `docker stack deploy --with-registry-auth --compose-file stack.yml stack_xxxx`
