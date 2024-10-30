@@ -11,6 +11,9 @@ networks:
 services:
   httpd:
     image: stack-java-httpd:0.1
+    build:
+      context: ./httpd/
+      # no_cache: true
     container_name: stack-java-httpd
     restart: unless-stopped
     ports:
@@ -19,9 +22,41 @@ services:
       - stack-java
     depends_on:
       - tomcat
+    develop:
+      ## WARNING le watch ne fonctionne pas avec l'édition des fichiers synchronisés
+      # avec VSCODE dans un dossier partagé
+      # tester dans un éditeur dans la VM 
+      # OU installer le code en dehors du dossier partagé ET connecter VSCODE dans le VM avec une connection SSH
+      watch:
+        ## sync => pour les fichiers statiques (css/html/js)
+        # - action: sync
+        #   path: /path/to/watch/obj
+        #   target: /path/on/ctn/obj
+        #   # if obj is directory
+        #   # do not watch these
+        #   ignore:
+        #     - /path/to/watch/obj/something
+        #     - ...
+        ## sync + restart => le code (redémarrer le conteneur)
+        # - action: sync+restart
+        #   path: ./httpd/java_app.conf
+        #   target: /usr/local/apache2/conf/sites/java_app.conf
+        ## rebuild: rebuild l'image
+        - action: rebuild
+          path: ./httpd/java_app.conf
     
   tomcat:
     image: stack-java-tomcat:0.1
+    ## build dans docker compose
+    # 1. si l'image en local => pas de build
+    # 2. sinon build auto des images manquantes
+    # 3. OU forcer le build avec docker compose up -d --build
+    build:
+      context: ./tomcat/
+      args:
+        # ${TOMCAT_VERSION_MAJOR:-9}: si la var. d'env dans le HOST est évaluée OU la valeur :- par défaut
+        - TOMCAT_VERSION_MAJOR=${TOMCAT_VERSION_MAJOR:-9}
+        - TOMCAT_VERSION_FULL=${TOMCAT_VERSION_FULL:-9.0.96}
     container_name: stack-java-tomcat
     restart: unless-stopped
     networks:
