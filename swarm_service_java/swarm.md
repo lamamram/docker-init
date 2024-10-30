@@ -113,6 +113,8 @@ par ex.
 
 * `https://docs.docker.com/engine/swarm/ingress/`
 
+![](ingress-routing-mesh.png)
+
 ## relier les conteneur à travers les noeuds (overlay network)
 
 * création sur le manager d'un réseau de type overlay qui couvre tous les noeuds
@@ -185,4 +187,6 @@ par ex.
 
 4. on peut demander l'image poussée formation.lan:443/<image>:<tag> dans la stack.yml
    => `--with-registry-auth` bypass le pull
+   => attention: tous les noeuds doivent connaître formation.lan => /etc/hosts
+   => attention: tous les noeuds doivent configurer le serveur docker avec le certificat tls auto signé => /etc/docker/daemon.json (cf registry.md) 
 5. `docker stack deploy --with-registry-auth --compose-file stack.yml stack_xxxx`
