@@ -1,0 +1,68 @@
+---
+
+services:
+  tomcat:
+    image: formation.lan:443/stack-java-tomcat:0.1
+    # image: stack-java-tomcat:0.1
+    networks:
+      stack-java:
+        aliases:
+          - stack-java-tomcat
+    labels:
+      - author.username=mlamamra
+      - author.email=mlamamra@dawan.fr
+    # structure du service dans SWARM
+    # &deploy-conf: référence en YAML
+    deploy: &deploy-conf
+      placement:
+        constraints:
+          - node.role != manager
+      # la stratégie de découverte réseau pour trouver un ou plusieurs "tasks" du service
+      endpoint_mode: vip # trouver une task
+      # la stratégie de dissiménation des tasks  
+      mode: replicated # dissiminer un nb de replicas où on peut
+      replicas: 2
+      # stratégie de redémmarage mais du service (pas des tasks)
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+        max_attempts: 2
+      # gestion des rolling updates => mise à jour des conditions / critères de l'état des servies
+      update_config:
+        # nb de threads (parallélisme): on peut gérer les maj de chaque task  en //
+        parallelism: 2
+        
+
+  
+  httpd:
+    # WARNING: pas de BUILD avec SWARM !
+    image: formation.lan:443/stack-java-httpd:0.1
+    # image: stack-java-httpd:0.1
+    ports:
+      - 8081:80
+    # 1. dans un dialecte YAML, on peut utiliser le polymorphisme
+    # => le type de la valeur d'une clé peut être variable
+    # ici networks peut être une liste ou un objet contenant des configs plus complexes
+    networks: 
+      stack-java:
+        # on peut spécifier des aliases pour différencier le nom du service
+        aliases:
+          - stack-java-httpd
+    depends_on:
+      - tomcat
+    labels:
+      - author.username=mlamamra
+      - author.email=mlamamra@dawan.fr
+    # *deploy-conf : alias YAML, accroche le contenu de &deploy-conf
+    # << : *deploy-conf: anchor YAML, accroche et redéfinit //
+    deploy: *deploy-conf
+
+    
+        
+
+networks:
+  stack-java:
+    name: stack-java
+    driver: overlay
+    
+    
