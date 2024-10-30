@@ -184,4 +184,5 @@ par ex.
    => donc dockerd se dégrade sur http
 
 4. on peut demander l'image poussée formation.lan:443/<image>:<tag> dans la stack.yml
+   => `--with-registry-auth` bypass le pull
 5. `docker stack deploy --with-registry-auth --compose-file stack.yml stack_xxxx`
