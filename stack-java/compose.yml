@@ -1,0 +1,28 @@
+
+networks:
+  stack-java:
+    name: stack-java
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.19.0.0/16
+          gateway: 172.19.0.1
+
+services:
+  httpd:
+    image: stack-java-httpd:0.1
+    container_name: stack-java-httpd
+    restart: unless-stopped
+    ports:
+      - 192.168.1.30:8081:80
+    networks:
+      - stack-java
+    depends_on:
+      - tomcat
+    
+  tomcat:
+    image: stack-java-tomcat:0.1
+    container_name: stack-java-tomcat
+    restart: unless-stopped
+    networks:
+      - stack-java

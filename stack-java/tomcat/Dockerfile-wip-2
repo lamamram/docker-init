@@ -1,0 +1,29 @@
+FROM debian:12-slim
+
+LABEL author="matt"
+LABEL created_at="2024-10-29"
+LABEL created_at.year="2024"
+LABEL stack="java"
+LABEL stack.service="tomcat"
+
+## optimisation n°1: quelles sont les instructions (couches) qui ne changent moins que les autres
+
+## ne change jamais
+RUN mkdir /opt/tomcat
+RUN useradd -M -U tomcat 
+# change peu
+RUN apt-get update && apt-get install -y openjdk-17-jre-headless
+RUN rm -rf /var/lib/apt/lists/*
+# change souvent !!
+ADD https://downloads.apache.org/tomcat/tomcat-9/v9.0.96/bin/apache-tomcat-9.0.96.tar.gz /opt/tomcat
+RUN tar -xzvf /opt/tomcat/apache-tomcat-9.0.96.tar.gz -C /opt/tomcat --strip-components=1
+RUN rm -rf /opt/tomcat/apache-tomcat-9.0.96.tar.gz
+# change jamais mais dépendant des instructions précédentes
+WORKDIR /opt/tomcat/webapps
+ADD https://tomcat.apache.org/tomcat-10.1-doc/appdev/sample/sample.war .
+RUN chown -R tomcat:tomcat /opt/tomcat
+USER tomcat
+VOLUME [ "/opt/tomcat/webapps" ]
+EXPOSE 8080
+CMD [ "/opt/tomcat/bin/catalina.sh", "run" ]
+
