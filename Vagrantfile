@@ -10,7 +10,7 @@ Vagrant.configure(2) do |config|
   # interface : réseau à utiliser (ipconfig /all | ip a)
   # range     : gamme d'ip à utiliser
   # cidr      : masque de sous réseau
-  interface = "Intel(R) Ethernet Connection (7) I219-V"
+  interface = "Intel(R) Ethernet Connection (7) I219-LM #2"
   range = "192.168.1.3"
   cidr = "24"
 
@@ -29,12 +29,14 @@ Vagrant.configure(2) do |config|
         v.name = "#{vmname}"
         v.customize ["modifyvm", :id, "--ioapic", "on"]
         v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+        v.customize ["modifyvm", :id, "--natpf1", "app,tcp,127.0.0.1,8080,,8080"]
+        v.customize ["modifyvm", :id, "--natpf1", "app2,tcp,127.0.0.1,8081,,8081"]
       end
       machine.vm.box = "#{os}"
       machine.vm.hostname = "#{vmname}"
-	  machine.vm.network "public_network", bridge: "#{interface}",
-        ip: "#{ip}",
-        netmask: "#{cidr}"
+	    # machine.vm.network "public_network", bridge: "#{interface}",
+      #   ip: "#{ip}",
+      #   netmask: "#{cidr}"
       machine.ssh.insert_key = false
       # lancer l'install de docker dès le lancement
       machine.vm.provision "shell", 
