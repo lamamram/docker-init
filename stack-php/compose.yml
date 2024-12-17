@@ -56,6 +56,9 @@ services:
       # dossier à gauche: dossier à droite 
       - nfs-vol-db:/docker-entrypoint-initdb.d:ro
       - db_data:/var/lib/mysql
+    # valeurs arbitraire
+    profiles:
+      - build
 
   php-fpm:
     container_name: stack-php-fpm 
@@ -69,6 +72,8 @@ services:
     # php dépend de la base de donnée => fixe un ordre de lancement
     depends_on:
       - db
+    profiles:
+      - build
 
   nginx:
     container_name: stack-php-nginx
@@ -83,9 +88,13 @@ services:
       - nfs-vol-nginx:/etc/nginx/conf.d
     depends_on:
       - php-fpm
+    profiles:
+      - build
   
 
   ## TACHES D'ADMINISTRATION
+  ## pour lancer une tâche individuelle éphèmère: docker compose run --rm <service-name>
+
 
   # backup à froid (en utilisant un conteneur en exécution)
   # on va:
@@ -111,5 +120,7 @@ services:
     #   - /dump/dump.tar.gz
     #   - /data
     command: tar -cvzf /dump/dump.tar.gz /data
+    profiles:
+      - task
     
     
