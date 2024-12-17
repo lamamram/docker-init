@@ -15,6 +15,31 @@ networks:
 volumes:
   db_data:
     name: db_data
+  ## Volumes NFS utilisés pour nos services
+  nfs-vol-db:
+    name: nfs-vol-db
+    # on aura une copie des fichiers originels du serveur en local
+    driver: local
+    driver_opts:
+      type: nfs
+      # nomenclature NFS
+      o: addr=formation.lan,ro
+      device: :/mnt/nfs-dir/initdb.d
+  nfs-vol-php:
+    name: nfs-vol-php
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=formation.lan,ro
+      device: :/mnt/nfs-dir/app
+  nfs-vol-nginx:
+    name: nfs-vol-nginx
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=formation.lan,ro
+      device: :/mnt/nfs-dir/nginx-conf.d
+
 
 # service = Ensemble de réplicas de conteneurs, dispatchés dans un cluster
 services:
@@ -27,7 +52,9 @@ services:
     networks:
       - stack-php
     volumes:
-      - ./mariadb-init.sql:/docker-entrypoint-initdb.d/mariadb-init.sql:ro
+      # - ./mariadb-init.sql:/docker-entrypoint-initdb.d/mariadb-init.sql:ro
+      # dossier à gauche: dossier à droite 
+      - nfs-vol-db:/docker-entrypoint-initdb.d:ro
       - db_data:/var/lib/mysql
 
   php-fpm:
@@ -37,7 +64,11 @@ services:
     networks:
       - stack-php
     volumes:
-      - ./index.php:/srv/index.php:ro
+      # - ./index.php:/srv/index.php:ro
+      - nfs-vol-php:/srv
+    # php dépend de la base de donnée => fixe un ordre de lancement
+    depends_on:
+      - db
 
   nginx:
     container_name: stack-php-nginx
@@ -48,4 +79,7 @@ services:
     ports:
       - 8080:80
     volumes:
-      - ./vhost.conf:/etc/nginx/conf.d/vhost.conf:ro
+      # - ./vhost.conf:/etc/nginx/conf.d/vhost.conf:ro
+      - nfs-vol-nginx:/etc/nginx/conf.d
+    depends_on:
+      - php-fpm
