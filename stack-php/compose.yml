@@ -1,0 +1,51 @@
+---
+
+networks:
+  stack-php:
+    # fixer le nom du réseau (désactive la politique de nommage par défaut de compose)
+    name: stack-php
+    driver: bridge
+    # Internet Protocal Adress Management
+    ipam:
+      config:
+        - subnet: 172.18.0.0/24
+          gateway: 172.18.0.1
+
+# il faut déclarer les volumes nommés
+volumes:
+  db_data:
+    name: db_data
+
+# service = Ensemble de réplicas de conteneurs, dispatchés dans un cluster
+services:
+  db:
+    container_name: stack-php-db 
+    image: mariadb:lts-ubi
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - stack-php
+    volumes:
+      - ./mariadb-init.sql:/docker-entrypoint-initdb.d/mariadb-init.sql:ro
+      - db_data:/var/lib/mysql
+
+  php-fpm:
+    container_name: stack-php-fpm 
+    image: bitnami/php-fpm:8.4-debian-12
+    restart: unless-stopped
+    networks:
+      - stack-php
+    volumes:
+      - ./index.php:/srv/index.php:ro
+
+  nginx:
+    container_name: stack-php-nginx
+    image: nginx:1.27.3-bookworm-perl
+    restart: unless-stopped
+    networks:
+      - stack-php
+    ports:
+      - 8080:80
+    volumes:
+      - ./vhost.conf:/etc/nginx/conf.d/vhost.conf:ro
