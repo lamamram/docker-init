@@ -8,7 +8,7 @@
 # -f ici, rend la commande "non-error" si le réseau n'existe pas !!!
 docker network rm -f stack-php
 
-#### RESEAU
+#### RESEAU CUSTOM (pour la résolution de nom auto. avec les noms des conteneurs)
 
 docker network create \
        --driver bridge \
@@ -22,18 +22,21 @@ docker run \
        --name stack-php-fpm \
        -d --restart unless-stopped \
        --net stack-php \
+       -v ./index.php:/srv/index.php \
        bitnami/php-fpm:8.4-debian-12
 
-docker cp index.php stack-php-fpm:/srv/index.php
+# remplacé par le -v bind mount: attention il faut spécifier la source comme un chemin
+# docker cp index.php stack-php-fpm:/srv/index.php
 
 docker run \
        --name stack-php-nginx \
        -d --restart unless-stopped \
        --net stack-php \
        -p 8080:80 \
+       -v ./vhost.conf:/etc/nginx/conf.d/vhost.conf \
        nginx:1.27.3-bookworm-perl
 
-docker cp vhost.conf stack-php-nginx:/etc/nginx/conf.d/vhost.conf
+# docker cp vhost.conf stack-php-nginx:/etc/nginx/conf.d/vhost.conf
 # rechargement de la conf nginx en rédémarrant le conteneur !!
-docker restart stack-php-nginx
+# docker restart stack-php-nginx
 
