@@ -29,6 +29,7 @@ docker run \
        --env-file .env \
        --net stack-php \
        -v ./mariadb-init.sql:/docker-entrypoint-initdb.d/mariadb-init.sql:ro \
+       -v db_data:/var/lib/mysql \
        mariadb:lts-ubi
 
 
