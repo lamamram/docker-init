@@ -10,13 +10,13 @@ LABEL stack.version="1.0"
 ## ajouter un dossier /opt/tomcat
 # RUN mkdir /opt/tomcat
 
-## injecter le fichier https://downloads.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz dans ce dossier
-# ADD https://downloads.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz /opt/tomcat
+## injecter le fichier https://downloads.apache.org/tomcat/tomcat-9/v9.0.98/bin/apache-tomcat-9.0.98.tar.gz dans ce dossier
+# ADD https://downloads.apache.org/tomcat/tomcat-9/v9.0.98/bin/apache-tomcat-9.0.98.tar.gz /opt/tomcat
 
 ## décomprésser dans ce dossier sans dossier intermédiaire 
-# RUN curl https://downloads.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz -o /opt/tomcat/apache-tomcat-9.0.93.tar.gz
-# RUN tar -xzvf /opt/tomcat/apache-tomcat-9.0.93.tar.gz -C /opt/tomcat --strip-components=1
-# RUN rm -f /opt/tomcat/apache-tomcat-9.0.93.tar.gz
+# RUN curl https://downloads.apache.org/tomcat/tomcat-9/v9.0.98/bin/apache-tomcat-9.0.98.tar.gz -o /opt/tomcat/apache-tomcat-9.0.93.tar.gz
+# RUN tar -xzvf /opt/tomcat/apache-tomcat-9.0.98.tar.gz -C /opt/tomcat --strip-components=1
+# RUN rm -f /opt/tomcat/apache-tomcat-9.0.98.tar.gz
 
 
 ## installer java (apt-get) et nettoyer le dépôt
