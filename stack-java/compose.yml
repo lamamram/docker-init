@@ -1,5 +1,11 @@
 ---
 
+## en cas de build dans compose
+## 1/ si les images ne sont pas en local ET elle n'existent pas dans le registre public ou privé => build 
+## 2/ sinon les images locales sont utilisées => pas build
+## 3/ SAUF si on veut rebuilder: docker compose up -d --build => force le build
+## 4/ si vous voulez reconstruire complètement des images : no_cache
+
 networks:
   stack-java:
     name: stack-java
@@ -13,6 +19,10 @@ services:
   httpd:
     container_name: stack-java-httpd
     image: stack-java-httpd:1.0
+    build:
+      context: ./httpd
+      # no_cache: true
+      # dockerfile: Dockerfile
     restart: unless-stopped
     networks:
       - stack-java
@@ -24,6 +34,11 @@ services:
   tomcat:
     container_name: stack-java-tomcat
     image: stack-java-tomcat:1.0
+    build:
+      context: ./tomcat
+      args:
+        - TOMCAT_VERSION_MAJOR=${TOMCAT_VERSION_MAJOR:-9}
+        - TOMCAT_VERSION_FULL=${TOMCAT_VERSION_FULL:-9.0.98}
     restart: unless-stopped
     networks:
       - stack-java
