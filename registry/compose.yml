@@ -1,0 +1,34 @@
+---
+
+services:
+  registry:
+    image: registry:2
+    container_name: registry
+    restart: unless-stopped
+    environment:
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/registry.crt
+      REGISTRY_HTTP_TLS_KEY: /certs/registry.key
+      REGISTRY_HTTP_ADDR: 0.0.0.0:443
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
+    # 5000 par défaut
+    ports:
+      - 5000:5000
+      - 443:443
+    networks:
+      - registry
+    volumes:
+      - ./certs:/certs:ro
+      - ./auth:/auth:ro
+      - ./conf:/etc/docker/registry:ro
+
+
+networks:
+  registry:
+    name: registry
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/24
+          gateway: 172.21.0.1
