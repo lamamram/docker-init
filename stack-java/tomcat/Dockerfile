@@ -36,3 +36,23 @@ VOLUME [ "/opt/tomcat/webapps" ]
 EXPOSE 8080
 
 CMD ["/opt/tomcat/bin/catalina.sh", "run" ]
+
+# après le lancement du conteneur lié à cette image (docker run)
+# 1/ on va attendre 3s (start-period)
+# 2/ on exécute le CMD du HEALTHCHECK qui DOIT PROUVER que le conteneur est lancé correctement
+# 3.1/ soit le CMD du HEALTHCHECK termine avant 5s (le timeout) avec un code de retour 0 (SUCESS)
+#      => le STATUS du docker ps spécifie "healthy"
+# 3.2/ soit le CMD du HEALTHCHECK termine avant 5s (le timeout) avec un code de retour NON-0 (FAIL)
+#      => on décrémente le paramètre retries (3) => on peut réesssayer 3x
+#      => on attend 2s (interval) pour réessayer
+# 3.3/ soit le CMD du HEALTHCHECK termine APRES le timeout => retry + interval
+# Dans tous les cas si le CMD du HEALTHCHECK finit en non-0 (FAIL) alors
+#      => le STATUS du docker ps spécifie "unhealthy" 
+
+## WARNING: CMD du HEALTHCHECK ne fonctionne pas avec une liste de JSON ["" , ""]
+HEALTHCHECK \
+            --start-period=3s \
+            --timeout=5s \
+            --retries=3 \
+            --interval=2s \
+            CMD grep "Server startup" /opt/tomcat/logs/catalina.*.log
