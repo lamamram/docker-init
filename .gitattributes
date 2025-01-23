@@ -1,0 +1,6 @@
+*.sh eol=lf
+insecure_private_key eol=lf
+*.yml eol=lf
+*.php eol=lf
+*.sql eol=lf
+*.conf eol=lf
