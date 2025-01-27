@@ -56,6 +56,7 @@ Vagrant.configure(2) do |config|
         netmask: "#{cidr}"
       machine.ssh.insert_key = false
       # lancer l'install de docker dès le lancement
+      machine.vm.provision "shell", inline: etcHosts
       machine.vm.provision "shell", 
         path: "install_docker.sh",
         reboot: true,
