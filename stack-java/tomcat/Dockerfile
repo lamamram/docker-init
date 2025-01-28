@@ -1,33 +1,53 @@
+# FROM scratch => pour les images de base: distros
 ## nous allons utiliser une image debian12
-
+## BEST PRACTICE: ajoutons le tag "slim" pour optimiser la taille de l'image
+FROM debian:12-slim
 
 ## documenter l'image
-
+LABEL author="matt"
+LABEL created_at="2025-01-28"
+LABEL created_at.year="2025"
+LABEL stack="java"
+LABEL stack.service="tomcat"
 
 ## ajouter un dossier /opt/tomcat
+RUN mkdir /opt/tomcat
 ## injecter le fichier https://downloads.apache.org/tomcat/tomcat-9/v9.0.98/bin/apache-tomcat-9.0.98.tar.gz dans ce dossier
+ADD https://downloads.apache.org/tomcat/tomcat-9/v9.0.98/bin/apache-tomcat-9.0.98.tar.gz /opt/tomcat
 ## décomprésser dans ce dossier sans dossier intermédiaire 
+RUN tar -xvzf /opt/tomcat/apache-tomcat-9.0.98.tar.gz -C /opt/tomcat --strip-components=1
 ## et supprimer l'archive
-
+RUN rm /opt/tomcat/apache-tomcat-9.0.98.tar.gz
 
 ## installer java (apt-get)
+## BEST PRACTICE: choisir un paquet le plus petit
+RUN apt-get update && apt-get install -y openjdk-17-jre-headless
 ## et nettoyer le dépôt apt-get après
+RUN rm -rf /var/lib/apt/cache/lists/*
 
 ## ajouter un utilisateur tomcat avec le dossier /opt/tomcat comme home et le groupe propriétaire
+## BEST PRACTICE: lancer les conteneurs via un utilisateur sans ROOT
+RUN useradd -M -d /opt/tomcat -U tomcat
 
 ## ajouter le dossier home du conteneur: /opt/tomcat/webapps
-
+WORKDIR /opt/tomcat/webapps
 
 ## télécharger l'application sample https://tomcat.apache.org/tomcat-10.1-doc/appdev/sample/sample.war dans le dossier home 
+ADD https://tomcat.apache.org/tomcat-10.1-doc/appdev/sample/sample.war .
 
 ## spécifier le propriétaire et groupe à tomcat pour le dossier /opt/tomcat 
+## restreindre les accès à tomcat
+RUN chown -R tomcat:tomcat /opt/tomcat
 
 ## changer l'utilisateur à tomcat
+USER tomcat
 
 ## persister le dossier home pour accéder ou sauvegarder les apps
+VOLUME [ "/opt/tomcat/webapps" ]
 
 ## pour communiquer avec httpd avec le port par défaut de tomcat  ???
+EXPOSE 8080
 
 ## exécuter de manière dynamique (avec substitution) le binaire en foreground catalina.sh vs startup.sh ???
-## et ajouter la sous commande pour lancer en one shot run ou start ???
-
+## et ajouter la sous commande pour lancer dans la même fenêtre (session) run ou start ???
+CMD ["/opt/tomcat/bin/catalina.sh", "run"]
