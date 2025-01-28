@@ -1,0 +1,114 @@
+---
+
+## déclarer / créer les réseaux
+networks:
+  stack-php:
+    # fixer le nom du réseau
+    name: stack-php
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/24
+          gateway: 172.18.0.1
+
+
+## déclarer / créer les volumes nommés
+volumes:
+  db_data:
+    name: db_data
+  nfs-vol-db:
+    name: nfs-vol-db
+    ## config
+    # les éléments du serveur NFS sont téléchargés dans l'emplacement local (/var/lib/docker/volumes/...)
+    driver: local
+    driver_opts:
+      type: nfs
+      # nomenclature NFS
+      o: addr=docker.lan,ro
+      device: :/mnt/nfs-dir/initdb.d
+  nfs-vol-fpm:
+    name: nfs-vol-fpm
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=docker.lan,ro
+      device: :/mnt/nfs-dir/app
+  nfs-vol-nginx:
+    name: nfs-vol-nginx
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=docker.lan,ro
+      device: :/mnt/nfs-dir/nginx-conf.d
+
+
+services:
+  ## service = ensemble de répliques (replicas) d'une même définition de conteneur
+  db:
+    # fixer le nom des conteneurs
+    container_name: stack-php-db
+    image: mariadb:lts-ubi
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - stack-php
+    volumes:
+      # DOSSIER à GAUCHE : DOSSIER à droite
+      - nfs-vol-db:/docker-entrypoint-initdb.d:ro
+      # - ./mariadb-init.sql:/docker-entrypoint-initdb.d/mariadb-init.sql:ro
+      - db_data:/var/lib/mysql
+    profiles:
+      - build
+
+  fpm:
+    container_name: stack-php-fpm
+    image: bitnami/php-fpm:8.4-debian-12
+    restart: unless-stopped
+    networks:
+      - stack-php
+    volumes:
+      - nfs-vol-fpm:/srv:ro
+      # - ./index.php:/srv/index.php:ro
+    depends_on:
+      - db
+    profiles:
+      - build
+
+  nginx:
+    container_name: stack-php-nginx
+    image: nginx:1.27.3-bookworm
+    restart: unless-stopped
+    networks:
+      - stack-php
+    ports:
+      - 8080:80
+    volumes:
+      - nfs-vol-nginx:/etc/nginx/conf.d:ro
+      # - ./vhost.conf:/etc/nginx/conf.d/vhost.conf:ro
+    depends_on:
+      - fpm
+    profiles:
+      - build
+
+  ###  tâches d'administrations
+  # backup à froid
+  # 1. j'accroche le volume db_data
+  # 2. je compresse le dossier des bdd en tar.gz
+  # 3. je fais sortir le dump dans le dossier utiliateut (bind mount)
+  ## pour exécuter une tâche d'administration (commande one-shot)
+  # docker compose run --rm <service_name>
+  backup:
+    image: alpine:3.21
+    # pas besoin de réseau
+    network_mode: none
+    volumes:
+      # le volume préexistant db_data va être monté dans le conteneur dans un dossier
+      # qui va être créé automatiquement
+      - db_data:/data
+      # bind mount entre un dossier dans le dossier utilisateut, créé automatiquement 
+      # et un dossier dans le conteneur créé automatiquement
+      - ./dump:/dump
+    command: tar -cvzf /dump/dump.tar.gz /data
+    profiles:
+      - task
