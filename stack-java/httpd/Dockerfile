@@ -12,6 +12,10 @@ COPY httpd.conf /usr/local/apache2/conf
 # copie du contexte - ".dockerignore" 
 # COPY . /usr/local/apache2/conf
 
+RUN mkdir /usr/local/apache2/conf/sites
+
+COPY java_app.conf /usr/local/apache2/conf/sites
+
 ## déclarer le ou les ports surlesquels le processus sous jancent d'un conteneur lié à cette image, écoute
 # peut être vrai 80 ou faux 443
 EXPOSE 80 443
