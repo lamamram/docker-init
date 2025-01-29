@@ -1,4 +1,8 @@
 ---
+## si l'image n'existe pas en local => alors docker compose essaie de télécharger depuis le registre public
+## sinon si la section build existe => alors docker compose essaie de construire l'image
+## sauf si on ajoute l'option --build
+
 networks:
   stack-java:
     name: stack-java
@@ -12,6 +16,12 @@ services:
   tomcat:
     container_name: stack-java-tomcat
     image: stack-java-tomcat:1.0
+    build:
+      context: ./tomcat
+      args:
+        # on peut utiliser une variable du host (export TOMCAT_VERSION_MAJOR=9 )
+        - TOMCAT_VERSION_MAJOR=${TOMCAT_VERSION_MAJOR:-9}
+        - TOMCAT_VERSION_FULL=${TOMCAT_VERSION_FULL:-9.0.98}
     restart: unless-stopped
     networks:
       - stack-java
@@ -26,6 +36,9 @@ services:
   httpd:
     container_name: stack-java-httpd
     image: stack-java-httpd:1.0
+    build:
+      context: ./httpd
+      # no_cache: true
     restart: unless-stopped
     networks:
       - stack-java
