@@ -1,0 +1,53 @@
+---
+
+services:
+  tomcat:
+    # WARNING: pas de BUILD avec SWARM !
+    image: docker.lan:443/stack-java-tomcat:1.0
+    networks:
+      stack_java:
+        aliases:
+          - stack-java-tomcat
+    restart: unless-stopped
+    labels:
+      - author.username=mlamamra
+      - author.email=mlamamra@dawan.fr
+    # structure du service dans SWARM
+    deploy: &config
+      # la stratégie de découverte réseau pour trouver un ou plusieurs "tasks" du service
+      endpoint_mode: vip # trouver une task
+      # la stratégie de dissiménation des tasks  
+      mode: replicated # dissiminer un nb de replicas où on peut
+      replicas: 2
+      # stratégie de redémmarage mais du service (pas des tasks)
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+        max_attempts: 2
+      # gestion des rolling updates => mise à jour des conditions / critères de l'état des servies
+      update_config:
+        # nb de threads (parallélisme): on peut gérer les maj de chaque task  en //
+        parallelism: 2
+
+  
+  httpd:
+    image: docker.lan:443/stack-java-httpd:1.0
+    ports:
+      - 8081:80
+    networks: 
+      stack_java:
+        # on peut spécifier des aliases pour différencier le nom du service
+        aliases:
+          - stack-java-httpd
+    depends_on:
+      - tomcat
+    deploy: *config
+    
+
+networks:
+  stack_java:
+    name: stack_java
+    # driver pour cluster
+    driver: overlay
+    
+    

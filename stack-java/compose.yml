@@ -1,5 +1,5 @@
 ---
-## si l'image n'existe pas en local => alors docker compose essaie de télécharger depuis le registre public
+## si l'image n'existe pas en local => alors docker compose essaie de télécharger depuis le registre privé OU public
 ## sinon si la section build existe => alors docker compose essaie de construire l'image
 ## sauf si on ajoute l'option --build
 
@@ -15,7 +15,7 @@ networks:
 services:
   tomcat:
     container_name: stack-java-tomcat
-    image: stack-java-tomcat:1.0
+    image: docker.lan:443/stack-java-tomcat:1.0
     build:
       context: ./tomcat
       args:
@@ -35,8 +35,11 @@ services:
     #   start_period: 30s
   httpd:
     container_name: stack-java-httpd
-    image: stack-java-httpd:1.0
+    image: docker.lan:443/stack-java-httpd:1.0
     build:
+      # context distant
+      # context: https://github.com/lamamram/docker-init.git#main:stack-java/httpd
+      # ou en cli docker build -t stack-java-httpd:1.0 https://github.com/lamamram/docker-init.git#main:stack-java/httpd
       context: ./httpd
       # no_cache: true
     restart: unless-stopped

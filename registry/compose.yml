@@ -5,21 +5,18 @@ services:
     image: registry:2
     container_name: registry
     restart: unless-stopped
-    ## les configurations via les variables d'environnement 
-    ## écrasent les configurations du fichier config.yml
     environment:
-      # j'explique où sont les clés
       REGISTRY_HTTP_TLS_CERTIFICATE: /certs/registry.crt
       REGISTRY_HTTP_TLS_KEY: /certs/registry.key
-      # rend le serveur registre disponible sur le port 443 sur
-      # toutes les interfaces du conteneur via la publication la vm
       REGISTRY_HTTP_ADDR: 0.0.0.0:443
-      ## type d'authentification
-      REGISTRY_AUTH: htpasswd
-      # j'écrase la config de notre utilisateur
-      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
-      REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
-    # 5000 par défaut
+      REGISTRY_AUTH: token
+      REGISTRY_AUTH_TOKEN_REALM: https://docker.lan:5001/auth
+      REGISTRY_AUTH_TOKEN_SERVICE: "Docker registry"
+      REGISTRY_AUTH_TOKEN_ISSUER: "dawan auth server"
+      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /auth/server.pem
+      # REGISTRY_AUTH: htpasswd
+      # REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+      # REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
     ports:
       - 5000:5000
       - 443:443
@@ -27,9 +24,23 @@ services:
       - registry
     volumes:
       - ./certs:/certs:ro
-      - ./auth:/auth:ro
+      # - ./auth:/auth:ro
+      - ./docker_auth_certificates:/auth:ro
       - ./conf:/etc/docker/registry:ro
-
+    depends_on:
+      - auth
+  
+  auth:
+    image: cesanta/docker_auth:1
+    container_name: registry.auth
+    networks:
+      - registry
+    ports:
+      - 5001:5001
+    volumes:
+      - ./docker_auth_config:/config:ro
+      - ./docker_auth_certificates:/ssl:ro
+    command: ["--v=2", "--alsologtostderr", "/config/simple.yml"]
 
 networks:
   registry:
